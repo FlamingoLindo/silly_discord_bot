@@ -5,7 +5,7 @@ import asyncio
 import schedule
 import time
 
-from waifu import fetch_waifu
+from waifu import fetch_waifu, fetch_waifu_image
 
 from dotenv import load_dotenv
 
@@ -23,6 +23,7 @@ intents.message_content = True  # Required to read message content
 
 # Initialize the bot
 bot = commands.Bot(command_prefix="!", intents=intents)
+tree = bot.tree
 
 CHANNEL_ID = 1332106969200328794
 
@@ -30,6 +31,18 @@ CHANNEL_ID = 1332106969200328794
 async def on_ready():
     print(f"We have logged in as {bot.user}")
     bot.loop.create_task(schedule_messages())
+
+    try:
+        await tree.sync()  # Sync commands globally or for specific guilds
+        print("Application commands synced successfully!")
+    except Exception as e:
+        print(f"Error syncing commands: {e}")
+
+@tree.command(name="waifu", description="Send a safe-for-work (SFW) waifu image")
+async def waifu(interaction: discord.Interaction):
+    """Send a random SFW waifu image."""
+    waifu_url = await fetch_waifu_image()
+    await interaction.response.send_message(waifu_url)
 
 async def send_daily_message():
     """Send a daily message to a specific channel."""
